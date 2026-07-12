@@ -1,0 +1,20 @@
+{
+  "name": "claude-code-community",
+  "interface": {
+    "displayName": "Claude Code Community"
+  },
+  "plugins": [
+    {
+      "name": "claude-code",
+      "source": {
+        "source": "local",
+        "path": "./plugins/claude-code"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

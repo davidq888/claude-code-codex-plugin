@@ -1,0 +1,28 @@
+{
+  "name": "claude-code",
+  "version": "0.1.0+codex.20260711212858",
+  "description": "Claude Code workflow help for Codex.",
+  "author": {
+    "name": "davidq888"
+  },
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Claude Code",
+    "shortDescription": "Plan, run, and troubleshoot Claude Code workflows.",
+    "longDescription": "A local Codex plugin with guidance for using Anthropic Claude Code from the terminal: setup checks, project handoff prompts, common CLI workflow patterns, and troubleshooting steps.",
+    "developerName": "davidq888",
+    "category": "Productivity",
+    "capabilities": [
+      "CLI",
+      "Developer Tools",
+      "Interactive",
+      "Troubleshooting"
+    ],
+    "defaultPrompt": [
+      "Help me run Claude Code on this repo.",
+      "Draft a Claude Code prompt for my task.",
+      "Troubleshoot my Claude Code CLI setup."
+    ]
+  }
+}
