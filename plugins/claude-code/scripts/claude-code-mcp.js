@@ -27,8 +27,8 @@ function reject(id, code, message) {
 
 function resolveCommand(command) {
   const check = spawnSync(
-    process.platform === "win32" ? "where.exe" : "command",
-    process.platform === "win32" ? [command] : ["-v", command],
+    process.platform === "win32" ? "where.exe" : "/usr/bin/env",
+    process.platform === "win32" ? [command] : ["sh", "-c", "command -v claude"],
     { encoding: "utf8" }
   );
   if (check.status !== 0) {
@@ -227,7 +227,8 @@ async function callTool(name, args) {
 
   if (name === "claude_code_prompt") {
     const prompt = String(args?.prompt || "").trim();
-    const timeoutSeconds = Number(args?.timeoutSeconds || 120);
+    const requestedTimeout = Number(args?.timeoutSeconds);
+    const timeoutSeconds = Number.isFinite(requestedTimeout) ? requestedTimeout : 120;
     const permissionMode = String(args?.permissionMode || "manual");
     const permissionModes = new Set(["manual", "plan"]);
     if (!prompt) {
