@@ -2,6 +2,8 @@
   "name": "claude-code",
   "version": "0.1.0+codex.20260712110652",
   "description": "Security-focused Claude Code CLI integration for OpenAI Codex.",
+  "repository": "https://github.com/davidq888/claude-code-codex-plugin",
+  "license": "MIT",
   "author": {
     "name": "davidq888"
   },
@@ -11,6 +13,7 @@
     "displayName": "Claude Code",
     "shortDescription": "Use Claude Code from Codex with local login, status checks, and safe prompts.",
     "longDescription": "A security-focused OpenAI Codex plugin for Anthropic Claude Code. It connects to the local Claude Code CLI, opens the official Claude login flow, checks account status, and runs safe workspace-scoped Claude Code prompts through a local MCP server.",
+    "composerIcon": "./assets/icon.svg",
     "developerName": "davidq888",
     "category": "Productivity",
     "capabilities": [
