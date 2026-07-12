@@ -1,13 +1,14 @@
 ---
-name: Improvement suggestion
-about: Propose an improvement to the plugin
+name: Claude Code Codex plugin improvement
+about: Suggest an improvement for the Claude Code Codex plugin, MCP server, installer, or docs
 title: ""
 labels: enhancement
 ---
 
 ## Problem
 
-Describe the workflow or limitation you want to improve.
+Describe the Claude Code, OpenAI Codex, MCP server, installer, or documentation workflow you want to
+improve.
 
 ## Proposed change
 

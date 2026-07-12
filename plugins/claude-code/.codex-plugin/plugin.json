@@ -1,7 +1,7 @@
 {
   "name": "claude-code",
   "version": "0.1.0+codex.20260711212858",
-  "description": "Claude Code workflow help for Codex.",
+  "description": "Security-focused Claude Code CLI integration for OpenAI Codex.",
   "author": {
     "name": "davidq888"
   },
@@ -9,13 +9,17 @@
   "mcpServers": "./.mcp.json",
   "interface": {
     "displayName": "Claude Code",
-    "shortDescription": "Plan, run, and troubleshoot Claude Code workflows.",
-    "longDescription": "A local Codex plugin with guidance for using Anthropic Claude Code from the terminal: setup checks, project handoff prompts, common CLI workflow patterns, and troubleshooting steps.",
+    "shortDescription": "Use Claude Code from Codex with local login, status checks, and safe prompts.",
+    "longDescription": "A security-focused OpenAI Codex plugin for Anthropic Claude Code. It connects to the local Claude Code CLI, opens the official Claude login flow, checks account status, and runs safe workspace-scoped Claude Code prompts through a local MCP server.",
     "developerName": "davidq888",
     "category": "Productivity",
     "capabilities": [
       "CLI",
       "Developer Tools",
+      "MCP",
+      "AI Coding",
+      "Claude Code",
+      "OpenAI Codex",
       "Interactive",
       "Troubleshooting"
     ],

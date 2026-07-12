@@ -1,7 +1,7 @@
 {
-  "name": "claude-code-community",
+  "name": "claude-code-codex-plugin",
   "interface": {
-    "displayName": "Claude Code Community"
+    "displayName": "Claude Code Codex Plugin"
   },
   "plugins": [
     {
