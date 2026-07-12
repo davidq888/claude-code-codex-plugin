@@ -28,7 +28,7 @@ function reject(id, code, message) {
 function resolveCommand(command) {
   const check = spawnSync(
     process.platform === "win32" ? "where.exe" : "/usr/bin/env",
-    process.platform === "win32" ? [command] : ["sh", "-c", "command -v claude"],
+    process.platform === "win32" ? [command] : ["sh", "-c", "command -v \"$1\"", "--", command],
     { encoding: "utf8" }
   );
   if (check.status !== 0) {
@@ -67,10 +67,6 @@ function trustedClaudeExecutable() {
 
   const resolved = resolveCommand("claude");
   return resolved && !/\.(cmd|bat|ps1)$/i.test(resolved) ? resolved : null;
-}
-
-function commandExists() {
-  return Boolean(trustedClaudeExecutable());
 }
 
 function safeEnvironment() {
@@ -185,7 +181,7 @@ function startLogin() {
 
 async function callTool(name, args) {
   if (name === "claude_code_status") {
-    if (!commandExists()) {
+    if (!trustedClaudeExecutable()) {
       return text([
         "A trusted Claude Code CLI installation was not found.",
         "",
@@ -213,7 +209,7 @@ async function callTool(name, args) {
   }
 
   if (name === "claude_code_login") {
-    if (!commandExists()) {
+    if (!trustedClaudeExecutable()) {
       throw new Error("A trusted Claude Code CLI installation was not found. Run `claude_code_status` for setup steps.");
     }
 
@@ -240,7 +236,7 @@ async function callTool(name, args) {
     if (!permissionModes.has(permissionMode)) {
       throw new Error("Invalid `permissionMode`. Use manual or plan.");
     }
-    if (!commandExists()) {
+    if (!trustedClaudeExecutable()) {
       throw new Error("A trusted Claude Code CLI installation was not found. Run `claude_code_status` for setup steps.");
     }
 

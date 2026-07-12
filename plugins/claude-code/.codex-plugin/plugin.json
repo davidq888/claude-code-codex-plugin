@@ -1,6 +1,6 @@
 {
   "name": "claude-code",
-  "version": "0.1.0+codex.20260712105617",
+  "version": "0.1.0+codex.20260712110652",
   "description": "Security-focused Claude Code CLI integration for OpenAI Codex.",
   "author": {
     "name": "davidq888"
