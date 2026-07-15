@@ -66,7 +66,14 @@ function trustedClaudeExecutable() {
   }
 
   const resolved = resolveCommand("claude");
-  return resolved && !/\.(cmd|bat|ps1)$/i.test(resolved) ? resolved : null;
+  if (!resolved || !path.isAbsolute(resolved) || /\.(cmd|bat|ps1)$/i.test(resolved)) {
+    return null;
+  }
+  try {
+    return fs.statSync(resolved).isFile() ? resolved : null;
+  } catch {
+    return null;
+  }
 }
 
 function safeEnvironment() {
@@ -77,16 +84,34 @@ function safeEnvironment() {
   );
 }
 
+function boundedTimeoutMs(timeoutSeconds) {
+  const requested = Number(timeoutSeconds);
+  const seconds = Number.isFinite(requested) ? requested : 120;
+  return Math.max(10, Math.min(seconds, 600)) * 1000;
+}
+
 function appendOutput(output, chunk) {
   const remaining = MAX_OUTPUT_BYTES - Buffer.byteLength(output, "utf8");
   if (remaining <= 0) {
     return output;
   }
-  const text = chunk.toString();
-  if (Buffer.byteLength(text, "utf8") <= remaining) {
-    return output + text;
+  const bytes = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+  if (bytes.length <= remaining) {
+    return output + bytes.toString("utf8");
   }
-  return `${output}${text.slice(0, remaining)}\n[Output truncated.]`;
+  const marker = "\n[Output truncated.]";
+  const markerBytes = Buffer.byteLength(marker, "utf8");
+  if (remaining <= markerBytes) {
+    return output;
+  }
+  const available = remaining - markerBytes;
+  let end = available;
+  let clipped = bytes.subarray(0, end).toString("utf8");
+  while (Buffer.byteLength(clipped, "utf8") > available && end > 0) {
+    end -= 1;
+    clipped = bytes.subarray(0, end).toString("utf8");
+  }
+  return `${output}${clipped}${marker}`;
 }
 
 function terminateProcessTree(child) {
@@ -103,7 +128,11 @@ function terminateProcessTree(child) {
     child.kill();
     return;
   }
-  child.kill("SIGTERM");
+  try {
+    process.kill(-child.pid, "SIGKILL");
+  } catch {
+    child.kill("SIGKILL");
+  }
 }
 
 function runClaude(args, options = {}) {
@@ -117,6 +146,7 @@ function runClaude(args, options = {}) {
       cwd: process.cwd(),
       shell: false,
       windowsHide: true,
+      detached: process.platform !== "win32",
       env: safeEnvironment(),
     });
     let stdout = "";
@@ -223,8 +253,6 @@ async function callTool(name, args) {
 
   if (name === "claude_code_prompt") {
     const prompt = String(args?.prompt || "").trim();
-    const requestedTimeout = Number(args?.timeoutSeconds);
-    const timeoutSeconds = Number.isFinite(requestedTimeout) ? requestedTimeout : 120;
     const permissionMode = String(args?.permissionMode || "manual");
     const permissionModes = new Set(["manual", "plan"]);
     if (!prompt) {
@@ -241,7 +269,7 @@ async function callTool(name, args) {
     }
 
     const result = await runClaude(["--safe-mode", "--permission-mode", permissionMode, "-p", prompt], {
-      timeoutMs: Math.max(10, Math.min(timeoutSeconds, 600)) * 1000,
+      timeoutMs: boundedTimeoutMs(args?.timeoutSeconds),
     });
     return text([
       `Exit code: ${result.code}`,
@@ -310,7 +338,7 @@ async function handle(message) {
       respond(id, {
         protocolVersion: "2024-11-05",
         capabilities: { tools: {} },
-        serverInfo: { name: "claude-code-local", version: "0.1.0" },
+        serverInfo: { name: "claude-code-local", version: "0.2.0" },
       });
       return;
     }
@@ -340,25 +368,41 @@ async function handle(message) {
   }
 }
 
-process.stdin.setEncoding("utf8");
-process.stdin.on("data", (chunk) => {
-  buffer += chunk;
-  if (Buffer.byteLength(buffer, "utf8") > MAX_REQUEST_BYTES) {
-    buffer = "";
-    reject(null, -32700, "JSON-RPC message exceeds the 1 MiB limit.");
-    return;
-  }
-  let index;
-  while ((index = buffer.indexOf("\n")) >= 0) {
-    const line = buffer.slice(0, index).trim();
-    buffer = buffer.slice(index + 1);
-    if (!line) {
-      continue;
+function startServer() {
+  process.stdin.setEncoding("utf8");
+  process.stdin.on("data", (chunk) => {
+    buffer += chunk;
+    if (Buffer.byteLength(buffer, "utf8") > MAX_REQUEST_BYTES) {
+      buffer = "";
+      reject(null, -32700, "JSON-RPC message exceeds the 1 MiB limit.");
+      return;
     }
-    try {
-      handle(JSON.parse(line));
-    } catch (error) {
-      reject(null, -32700, error.message || String(error));
+    let index;
+    while ((index = buffer.indexOf("\n")) >= 0) {
+      const line = buffer.slice(0, index).trim();
+      buffer = buffer.slice(index + 1);
+      if (!line) {
+        continue;
+      }
+      try {
+        handle(JSON.parse(line));
+      } catch (error) {
+        reject(null, -32700, error.message || String(error));
+      }
     }
-  }
-});
+  });
+}
+
+if (require.main === module) {
+  startServer();
+}
+
+module.exports = {
+  appendOutput,
+  boundedTimeoutMs,
+  callTool,
+  resolveCommand,
+  safeEnvironment,
+  startServer,
+  tools,
+};

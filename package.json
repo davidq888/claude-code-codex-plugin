@@ -1,0 +1,15 @@
+{
+  "name": "claude-code-codex-plugin",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Development checks for the lightweight Claude Code plugin for Codex.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "check": "node --check plugins/claude-code/scripts/claude-code-mcp.js && node --check plugins/claude-code/scripts/install.mjs",
+    "test": "node --test tests/*.test.js tests/*.test.mjs",
+    "verify": "npm run check && npm test"
+  }
+}

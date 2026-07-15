@@ -1,64 +1,120 @@
-# Claude Code Codex Plugin for OpenAI Codex
+# Claude Code Codex Plugin
 
-Use Anthropic Claude Code from OpenAI Codex through a security-focused local plugin. This Codex
-plugin connects to a user's authenticated Claude Code CLI, opens the official Claude login flow,
-checks account status, and runs constrained Claude Code prompts from the current Codex workspace.
+[![Quality](https://github.com/davidq888/claude-code-codex-plugin/actions/workflows/quality.yml/badge.svg)](https://github.com/davidq888/claude-code-codex-plugin/actions/workflows/quality.yml)
+[![HOL Plugin Scanner](https://github.com/davidq888/claude-code-codex-plugin/actions/workflows/hol-plugin-scanner.yml/badge.svg)](https://github.com/davidq888/claude-code-codex-plugin/actions/workflows/hol-plugin-scanner.yml)
 
-This project is useful for developers searching for a Claude Code Codex plugin, Claude Code MCP
-server, Codex personal marketplace plugin, local Claude CLI integration, or a safe way to use Claude
-Code and Codex together.
+Use your local Anthropic Claude Code account from OpenAI Codex through a lightweight,
+security-focused plugin. Authentication stays with the official Claude Code CLI: this plugin never
+reads, copies, or stores Claude credentials.
 
-## Features
+![Claude Code Codex Plugin](plugins/claude-code/assets/screenshot.svg)
 
-- Local Claude Code CLI status checks through `claude_code_status`.
-- Official Anthropic browser login launch through `claude_code_login`.
-- Safe Claude Code prompt execution through `claude_code_prompt`.
-- Windows installer for Codex Personal marketplace setup.
-- No stored Claude credentials, tokens, API keys, or account data.
-- Safe mode, request limits, output limits, one-at-a-time execution, and process-tree cleanup.
+## Why This Plugin
 
-## Install
+- **Lightweight:** one local MCP server, one skill, three tools, and no runtime dependencies.
+- **Local:** Codex calls the Claude Code CLI already installed on your computer.
+- **Credential-free:** login tokens and account data remain under Claude Code's control.
+- **Constrained:** prompts use Claude safe mode with only `manual` and `plan` permission modes.
+- **Portable:** installation and automated checks support Windows, macOS, and Linux.
 
-Clone the repository, then run the Windows installer from the plugin directory:
+## Quick Start
+
+### Prerequisites
+
+- Node.js 18 or newer.
+- Claude Code installed and authenticated with your own Anthropic account.
+- OpenAI Codex with plugin support.
+
+### Install on any platform
+
+```bash
+git clone https://github.com/davidq888/claude-code-codex-plugin.git
+cd claude-code-codex-plugin
+node plugins/claude-code/scripts/install.mjs install
+```
+
+On Windows, the signed-Node PowerShell wrapper is also available:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\plugins\claude-code\install.ps1
 ```
 
-The installer copies the plugin to the recipient's profile, writes machine-specific MCP paths, and
-adds it to their Personal marketplace. Start a new Codex task after installation.
+Start a new Codex task after installation and enable Claude Code from the Personal marketplace.
 
-Each user authenticates their own Claude account through `claude_code_login`. The plugin opens the
-official Claude Code sign-in flow and never stores credentials in this repository or copies them with
-the installer.
+### Verify
 
-## Usage
-
-After installation, start a new Codex task and enable the Claude Code plugin from the Personal
-marketplace if needed. Common prompts:
+Ask Codex:
 
 ```text
 Check my Claude Code account status.
-Open Claude Code login.
-Run Claude Code on this repo in plan mode.
-Draft a Claude Code handoff prompt for this task.
 ```
+
+If authentication is missing or expired, ask:
+
+```text
+Open Claude Code login.
+```
+
+The official Claude Code sign-in flow opens in your browser. The plugin does not receive the
+credentials entered there.
+
+## Tools
+
+| Tool | Purpose | Permission boundary |
+| --- | --- | --- |
+| `claude_code_status` | Check CLI availability, version, doctor output, and account readiness | Local diagnostic commands only |
+| `claude_code_login` | Open the official Claude Code browser sign-in flow | No credential access |
+| `claude_code_prompt` | Ask Claude Code for a review, plan, or second opinion | Safe mode; `manual` or `plan` only |
+
+Example prompts:
+
+```text
+Run Claude Code on this repo in plan mode and review the current implementation.
+Ask Claude Code for a second opinion about this failing test.
+Draft a focused Claude Code handoff prompt for this task.
+```
+
+## Update and Uninstall
+
+```bash
+node plugins/claude-code/scripts/install.mjs update
+node plugins/claude-code/scripts/install.mjs uninstall
+```
+
+The installer writes only the machine-specific Node and MCP paths required by Codex. It never
+copies Claude account data.
 
 ## Security Model
 
-- Claude Code runs through a signed local executable.
-- MCP requests are size-limited and execute one at a time.
-- Prompts run in the current Codex task workspace with Claude safe mode enabled.
-- Autonomous permission modes are not exposed through the MCP server.
-- Child process output is capped and timed-out process trees are terminated.
+- Claude Code is resolved from expected local installation paths on Windows and from `PATH` on
+  macOS and Linux.
+- The child process receives a small allowlist of environment variables instead of the complete
+  Codex environment.
+- MCP requests, prompt length, output size, runtime, and concurrency are bounded.
+- Autonomous and permission-bypass modes are not exposed.
+- Timed-out process trees are terminated.
+- Claude authentication remains entirely in the official local CLI.
 
-## Keywords
+See [SECURITY.md](SECURITY.md) for reporting and trust-boundary details.
 
-`claude-code`, `codex-plugin`, `openai-codex`, `anthropic-claude`, `claude-cli`,
-`mcp-server`, `developer-tools`, `ai-coding`, `coding-agent`, `personal-marketplace`,
-`windows-plugin`, `safe-mode`
+## Development
 
-## Contributing
+The project intentionally has no runtime or test dependencies. Run all local checks with:
 
-Ideas, bug reports, and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) and
-[SECURITY.md](SECURITY.md).
+```bash
+npm run verify
+```
+
+GitHub Actions runs the same checks on Windows, macOS, and Linux. See
+[CONTRIBUTING.md](CONTRIBUTING.md) and [CHANGELOG.md](CHANGELOG.md) for contribution and release
+guidance.
+
+## Project Scope
+
+This plugin focuses on a small, auditable bridge between Codex and a user's local Claude Code CLI.
+It intentionally does not add autonomous permission modes, credential management, persistent job
+queues, or always-on hooks.
+
+## License
+
+[MIT](LICENSE)
